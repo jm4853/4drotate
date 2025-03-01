@@ -17,6 +17,7 @@ class Point:
     def rotate(self, axis, theta):
         loop = True
         while loop:
+            # https://math.stackexchange.com/questions/1402362/can-rotations-in-4d-be-given-an-explicit-matrix-form
             if axis == 'xy':
                 self.x, self.y, self.z, self.w = (
                     self.x * cos(theta) - self.y * sin(theta),
@@ -66,6 +67,7 @@ class Point:
                 )
                 return
             axis = axis[1] + axis[0]
+            loop = False
         print("error")
         return 1
 
