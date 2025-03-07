@@ -15,9 +15,11 @@ class Delta(object):
         return self.plane_rotations | {'d': self.double_rotation}
     def __getitem__(self, key):
         if key == 'a':
-            self.double_rotation[0] = value
+            return self.double_rotation[0]
         if key == 'b':
-            self.double_rotation[1] = value
+            return self.double_rotation[1]
+        if key == 's':
+            return self.s_h
         return self.components[''.join(sorted(key))]
     def __setitem__(self, key, value):
         if key == 'd':
