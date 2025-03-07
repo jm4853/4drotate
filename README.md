@@ -1,15 +1,22 @@
 # Rotate 4D
 A simple stereographic projection of a tesseract onto 3-space
 
+```
+ > python3 main.py
+```
+
 ## TODO
-- [ ] Refactor code into distinct components
+- Refactor code into distinct components
     - [ ] Shell
-        - [ ] Have terminal read pressed keys in real time
-    - [ ] Math
-        - [ ] Better math processing (maybe C?)
-    - [ ] Drawing
-        - [ ] Implement in OpenGL. Note that this requires another projection
-        - [ ] Explore matplotlib animation library
+    - [x] Math
+    - [x] Drawing
+- Shell
+    - [ ] Have terminal read pressed keys in real time
+- Math
+    - [ ] Better math processing (maybe C?)
+- Drawing
+    - [ ] Implement in OpenGL. Note that this requires another projection
+    - [ ] Explore matplotlib animation library
 
 
 ## Distinct Component Notes
