@@ -14,11 +14,24 @@ class Point:
         self.z = z
         self.w = w
 
+    def tuple(self):
+        return self.x, self.y, self.z, self.w
+
+    def double_rotate(self, alpha, beta):
+        self.x, self.y, self.z, self.w = (
+            self.x * cos(alpha) - self.y * sin(alpha),
+            self.x * sin(alpha) + self.y * cos(alpha),
+            self.z * cos(beta) - self.w * sin(beta),
+            self.z * sin(beta) + self.w * cos(beta),
+        )
+
+
     def rotate(self, axis, theta):
         loop = True
+        axis = set(axis)
         while loop:
             # https://math.stackexchange.com/questions/1402362/can-rotations-in-4d-be-given-an-explicit-matrix-form
-            if axis == 'xy':
+            if axis == {'x', 'y'}:
                 self.x, self.y, self.z, self.w = (
                     self.x * cos(theta) - self.y * sin(theta),
                     self.x * sin(theta) + self.y * cos(theta),
@@ -26,7 +39,7 @@ class Point:
                     self.w,
                 )
                 return
-            if axis == 'xz':
+            if axis == {'x', 'z'}:
                 self.x, self.y, self.z, self.w = (
                     self.x,
                     self.y * cos(theta) - self.w * sin(theta),
@@ -34,7 +47,7 @@ class Point:
                     self.y * sin(theta) + self.w * cos(theta),
                 )
                 return
-            if axis == 'xw':
+            if axis == {'x', 'w'}:
                 self.x, self.y, self.z, self.w = (
                     self.x,
                     self.y * cos(theta) - self.z * sin(theta),
@@ -42,7 +55,7 @@ class Point:
                     self.w,
                 )
                 return
-            if axis == 'yz':
+            if axis == {'y', 'z'}:
                 self.x, self.y, self.z, self.w = (
                     self.x * cos(theta) - self.w * sin(theta),
                     self.y,
@@ -50,7 +63,7 @@ class Point:
                     self.x * sin(theta) + self.w * cos(theta),
                 )
                 return
-            if axis == 'yw':
+            if axis == {'y', 'w'}:
                 self.x, self.y, self.z, self.w = (
                     self.x * cos(theta) - self.z * sin(theta),
                     self.y,
@@ -58,7 +71,7 @@ class Point:
                     self.w,
                 )
                 return
-            if axis == 'zw':
+            if axis == {'z', 'w'}:
                 self.x, self.y, self.z, self.w = (
                     self.x,
                     self.y,
@@ -78,47 +91,54 @@ class PointSet:
     def __init__(self, points):
         self.points = points
 
-    def rotate(self, axis, theta):
+    def tuple(self):
+        return [p.tuple() for p in self.points]
+
+    def double_rotate(self, alpha, beta):
+        for p in self.points:
+            p.double_rotate(alpha, beta)
+
+    def _rotate(self, axis, theta):
         for p in self.points:
             p.rotate(axis, theta)
+
+    def rotate(self, *args):
+        if args[0][0] == 'd':
+            return self.double_rotate(*args[1])
+        return self._rotate(*args)
 
     def __str__(self):
         return "[" + ", ".join([str(p) for p in self.points]) + "]"
 
-delta = None
+def doStereography(point):
+    x, y, z, w = point
+    return (
+        x / (HEIGHT - w),
+        y / (HEIGHT - w),
+        z / (HEIGHT - w),
+        w / (HEIGHT - w),
+    )
 
+def doNone(*args):
+    return args[0]
+
+delta = None
+PROJECTION = doNone
+HEIGHT = 3
+
+        
 
 def deltaThread():
-    global delta
-    def parseMag(mag, axis):
-        s = 1
-        if mag[0] == '-':
-            s = -1
-            mag = mag.replace('-', '+')
-        if mag[0] == '+':
-            t = mag[:mag.rfind('+') + 1]
-            if set(t) != {'+'}:
-                print(f"Invalid magnitude")
-                return delta[axis]
-            exp = len(t)
-            t = mag[mag.rfind('+') + 1:]
-            try:
-                t = float(t)
-            except:
-                t = 1
-            return delta[axis] + s * t * (10 ** (-1 * (6 - exp)))
-        else:
-            try:
-                return float(mag)
-            except:
-                print(f"Invalid magnitude: {mag}")
-            return delta[axis]
+    global delta, PROJECTION, HEIGHT
     
     delta_cache = None
     while True:
         print(f"{'\n'.join([f'{k} {v}' for k, v in (delta_cache if delta_cache else delta).items() if v])}")
         line = input(f"{'*' if delta_cache else ' '}> ")
         if not line:
+            continue
+        if line[0] == 'z':
+            delta = {k: 0 for k, _ in delta.items()}
             continue
         if line[0] == 'p':
             if delta_cache:
@@ -127,6 +147,23 @@ def deltaThread():
             else:
                 delta_cache = delta.copy()
                 delta = {k: 0 for k, _ in delta.items()}
+            continue
+        if line[0] == 'd':
+            try:
+                delta['d'] = [float(line.split()[1]), float(line.split()[2])]
+            except:
+                print(f"Invalid double angle parameters: {line}")
+            continue
+        if line[0] == 's':
+            try:
+                if len(line.split()) == 1:
+                    PROJECTION = doNone
+                else:
+                    HEIGHT = float(line.split()[1])
+                    PROJECTION = doStereography
+            except Exception as e:
+                print(f"Bad line: {line}")
+                print(f"{e}")
             continue
         if len(line.split()) != 2:
             print(f"Invalid rotation, expected: \"[plane] [magnitude]\"")
@@ -142,7 +179,6 @@ def deltaThread():
 
         # delta[axis] = parseMag(mag, axis)
         delta[axis] = float(mag)
-
 
 
 if __name__ == "__main__":
@@ -168,20 +204,31 @@ if __name__ == "__main__":
     placed = []
     for l in s.points:
         p1, p2 = l.points
-        placed += ax.plot3D([p1.x, p2.x], [p1.y, p2.y], [p1.z, p2.z], 'green')
-        # placed += ax.plot3D(p1.x, p1.y, p1.z, 'bo')
-        # placed += ax.plot3D(p2.x, p2.y, p2.z, 'bo')
+        x1, y1, z1, w1, = PROJECTION(p1.tuple())
+        x2, y2, z2, w2, = PROJECTION(p2.tuple())
+        
+        placed += ax.plot3D([x1, x2], [y1, y2], [z1, z2], 'green')
+        placed += ax.plot3D(x1, y1, z1, 'bo')
+        placed += ax.plot3D(x2, y2, z2, 'bo')
     plt.pause(0.05)
+    # delta = {
+    #     'zw': -0.05,
+    #     'yw': 0,
+    #     'yz': 0,
+    #     'xw': 0,
+    #     'xz': 0,
+    #     'xy': 0.03125,
+    # }
+    # s.rotate('xw', 1)
+    # s.rotate('xy', 5)
     delta = {
-        'zw': -0.05,
+        'zw': 0,
         'yw': 0,
         'yz': 0,
         'xw': 0,
         'xz': 0,
-        'xy': 0.03125,
+        'xy': 0,
     }
-    s.rotate('xw', 1)
-    s.rotate('xy', 5)
 
     thread = Thread(target = deltaThread)
     thread.start()
@@ -201,8 +248,13 @@ if __name__ == "__main__":
         placed = []
         for l in s.points:
             p1, p2 = l.points
-            placed += ax.plot3D([p1.x, p2.x], [p1.y, p2.y], [p1.z, p2.z], 'green')
-            # placed += ax.plot3D(p1.x, p1.y, p1.z, 'bo')
-            # placed += ax.plot3D(p2.x, p2.y, p2.z, 'bo')
+            x1, y1, z1, w1, = PROJECTION(p1.tuple())
+            x2, y2, z2, w2, = PROJECTION(p2.tuple())
+            # x1, y1, z1, w1, = doStereography(p1.tuple())
+            # x2, y2, z2, w2, = doStereography(p2.tuple())
+            
+            placed += ax.plot3D([x1, x2], [y1, y2], [z1, z2], 'green')
+            placed += ax.plot3D(x1, y1, z1, 'bo')
+            placed += ax.plot3D(x2, y2, z2, 'bo')
         
         plt.pause(0.01)
