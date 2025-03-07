@@ -141,7 +141,10 @@ class PointServer:
     def __next__(self):
         for axis, mag in self.delta.items():
             self.lines.rotate(axis, mag)
-        return [(self._projection(p1), self._projection(p2)) for p1, p2 in [l.points for l in self.lines.points]]
+        return [
+            (self._projection(p1), self._projection(p2))
+            for p1, p2 in [l.points for l in self.lines.points]
+        ]
 
 
 

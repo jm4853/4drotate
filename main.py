@@ -7,9 +7,9 @@ import time
 if __name__ == '__main__':
     delta = Delta(a=0.05559016, b=0.005)
     # draw = Drawer()
-    draw = Drawer2D()
+    drawer = Drawer2D()
     line_server = PointServer(delta, mode='2d')
     # shell = Shell(delta)
 
     for lines in line_server:
-        draw.draw(lines)
+        drawer.draw(lines)
