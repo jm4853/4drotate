@@ -1,5 +1,5 @@
 # Rotate 4D
-A simple stereographic projection of a tesseract onto 3-space
+A simple stereographic projection of a tesseract
 
 ```
  > python3 main.py
@@ -15,7 +15,7 @@ A simple stereographic projection of a tesseract onto 3-space
 - Math
     - [ ] Better math processing (maybe C?)
 - Drawing
-    - [ ] Implement in OpenGL. Note that this requires another projection
+    - [ ] Implement in OpenGL
     - [ ] Explore matplotlib animation library
 
 
