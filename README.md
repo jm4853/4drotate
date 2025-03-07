@@ -13,7 +13,7 @@ A simple stereographic projection of a tesseract
 - Shell
     - [ ] Have terminal read pressed keys in real time
 - Math
-    - [ ] Better math processing (maybe C?)
+    - [ ] Better math processing ([maybe C](https://www.digitalocean.com/community/tutorials/calling-c-functions-from-python)?) 
 - Drawing
     - [ ] Implement in OpenGL
     - [ ] Explore matplotlib animation library
