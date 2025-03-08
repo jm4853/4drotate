@@ -1,5 +1,5 @@
 class Delta(object):
-    def __init__(self, wx=0, wy=0, wz=0, xy=0, xz=0, yz=0, a=0, b=0, s_h=3):
+    def __init__(self, wx=0, wy=0, wz=0, xy=0, xz=0, yz=0, a=0, b=0, h=3):
         self.plane_rotations = {
             'wx': wx,
             'wy': wy,
@@ -9,7 +9,7 @@ class Delta(object):
             'yz': yz,
         }
         self.double_rotation = [a, b]
-        self.s_h = s_h # stereo_height
+        self.h = h
     @property
     def components(self):
         return self.plane_rotations | {'d': self.double_rotation}
@@ -18,8 +18,8 @@ class Delta(object):
             return self.double_rotation[0]
         if key == 'b':
             return self.double_rotation[1]
-        if key == 's':
-            return self.s_h
+        if key == 'h':
+            return self.h
         return self.components[''.join(sorted(key))]
     def __setitem__(self, key, value):
         if key == 'd':
@@ -28,8 +28,8 @@ class Delta(object):
             self.double_rotation[0] = value
         if key == 'b':
             self.double_rotation[1] = value
-        if key == 's':
-            self.s_h = value
+        if key == 'h':
+            self.h = value
         else:
             self.plane_rotations[''.join(sorted(key))] = value
     def items(self): 

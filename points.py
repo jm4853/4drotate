@@ -1,4 +1,6 @@
 from math import sin, cos
+import ctypes
+import copy
 
 class Point:
     def __init__(self, x, y, z, w):
@@ -110,6 +112,7 @@ def makeLines():
             p2 = p1.copy()
             p2[i] *= -1
             s.points.append(PointSet([Point(*p1), Point(*p2)]))
+    # print(f"Made lines: {str(s)}")
     return s
     
 class PointServer:
@@ -127,9 +130,9 @@ class PointServer:
     def _projection(self, p):
         x, y, z, w = p.tuple()
         t = (
-            x / (self.delta.s_h - w),
-            y / (self.delta.s_h - w),
-            z / (self.delta.s_h - w),
+            x / (self.delta.h - w),
+            y / (self.delta.h - w),
+            z / (self.delta.h - w),
         )
         if self.mode == '2d':
             return self._projection2d(*t)
@@ -148,3 +151,30 @@ class PointServer:
 
 
 
+class CPointServer:
+    def __init__(self, delta, lines=None):
+        self.delta = delta
+        self.lines = None
+        # self.lines = (((ctypes.c_int*3)*2)*32)(*[((ctypes.c_int*3)*2)(*[(ctypes.c_int*3)(*[0,0,0]) for p in range(2)]) for i in range(32)])
+        self.funcs = ctypes.CDLL('./lib/rotate.so')
+        self.funcs.init_lines()
+        self.funcs.get.restype = ctypes.c_double
+        # self.funcs.print_lines()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.funcs.do_rotation(ctypes.c_double(self.delta['a']), ctypes.c_double(self.delta['b']), ctypes.c_double(self.delta.h))
+        # self.funcs.print_lines3d()
+        t = []
+        for i in range(32):
+            t.append([])
+            for j in range(2):
+                t[i].append([])
+                for k in range(3):
+                    s = self.funcs.get(ctypes.c_int(i), ctypes.c_int(j), ctypes.c_int(k))
+                    # print(f"{i},{j},{k}> {s} {type(s)}")
+                    t[i][j].append(s)
+        # print(f"t: {t}")
+        return copy.deepcopy(t)

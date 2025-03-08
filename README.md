@@ -6,6 +6,7 @@ A simple stereographic projection of a tesseract
 ```
 
 ## TODO
+- [ ] All coordinates should be in form (w, x, y, z)
 - Refactor code into distinct components
     - [ ] Shell
     - [x] Math
