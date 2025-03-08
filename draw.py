@@ -13,7 +13,6 @@ class Drawer:
         self.ax.set_aspect('equal')
         self.placed = []
 
-
     def draw(self, lines):
         for p in self.placed:
             p.remove()
@@ -32,7 +31,6 @@ class Drawer2D:
         plt.ylim(-2, 2)
         plt.axis('scaled')
         self.placed = []
-
 
     def draw(self, lines):
         for p in self.placed:

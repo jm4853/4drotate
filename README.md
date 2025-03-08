@@ -2,11 +2,12 @@
 A simple stereographic projection of a tesseract
 
 ```
+ > make
  > python3 main.py
 ```
 
 ## TODO
-- [ ] All coordinates should be in form (w, x, y, z)
+- [ ] Virtual Environment `requirements.txt`
 - Refactor code into distinct components
     - [ ] Shell
     - [x] Math
